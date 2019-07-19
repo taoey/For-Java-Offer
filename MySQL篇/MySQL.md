@@ -5,11 +5,35 @@
    * [MySQL](#mysql)
       * [一 、MySQL 基础](#一-mysql-基础)
          * [1、MySQL基础架构](#1mysql基础架构)
+         * [2、数据库范式](#2数据库范式)
+         * [3、数据更新：update](#3数据更新update)
+            * [update语句常见场景,分为两大类](#update语句常见场景分为两大类)
+            * [单表update单字段](#单表update单字段)
+            * [单表update多字段](#单表update多字段)
+            * [多表关联update单字段](#多表关联update单字段)
+            * [多表关联update多字段](#多表关联update多字段)
+         * [4、数据查询：连接查询](#4数据查询连接查询)
+         * [5、重置自增](#5重置自增)
+            * [（1）truncate方法(效率高，谨慎使用)](#1truncate方法效率高谨慎使用)
+            * [（2）delete(数据量大则效率低)](#2delete数据量大则效率低)
       * [二、索引](#二索引)
       * [三、存储引擎](#三存储引擎)
       * [四、事务](#四事务)
-      * [五、查询性能优化](#五查询性能优化)
-      * [六、复制](#六复制)
+         * [（1）什么是事务？](#1什么是事务)
+         * [（2）事务四大特性(ACID)](#2事务四大特性acid)
+            * [原子性（Atomicity）](#原子性atomicity)
+            * [一致性（Consistency）](#一致性consistency)
+            * [隔离性（Isolation）](#隔离性isolation)
+            * [持久性（Durability）](#持久性durability)
+         * [（3）MySQL事务操作](#3mysql事务操作)
+         * [（4）JDBC事务操作](#4jdbc事务操作)
+      * [五、数据并发问题](#五数据并发问题)
+      * [六、数据库隔离级别及相关问题](#六数据库隔离级别及相关问题)
+         * [1、什么是隔离级别？](#1什么是隔离级别)
+         * [2、隔离级别分类](#2隔离级别分类)
+         * [3、隔离级别详细解读](#3隔离级别详细解读)
+         * [4、在项目中设置数据隔离级别](#4在项目中设置数据隔离级别)
+      * [七、查询性能优化](#七查询性能优化)
 
 ## 一 、MySQL 基础
 
@@ -125,17 +149,13 @@ where exists(select 1 from stu1 t2 where t2.ID = t.ID)
   - 不满足，继续在从表中匹配
     - 如果主表记录在从表记录中一个都没有匹配到，也要保留该记录，从表对应的记录都设置为null
 
-
-
-
-
 **其他相关注意**
 
 - 如果inner join 没有匹配条件（就是没有on）就是其实就是交叉连接，应该极力避免，例如：`select * from a inner join b`
 
 
 
-参考资料**
+**参考资料**
 
 - [mysql的几种join](https://blog.csdn.net/u012410733/article/details/63684663)
 
@@ -148,7 +168,7 @@ where exists(select 1 from stu1 t2 where t2.ID = t.ID)
 - truncate
 - delete
 
-##### truncate方法(效率高，谨慎使用)：
+#### （1）truncate方法(效率高，谨慎使用)
 
 清空表数据并重置id：
 
@@ -160,7 +180,7 @@ truncate table table_name;
 
 是DLL语言，无法回滚；当表被TRUNCATE 后，这个表和索引所占用的空间会恢复到初始大小。 
 
-##### delete(数据量大则效率低)
+#### （2）delete(数据量大则效率低)
 
 delete from table_name;
 
@@ -211,7 +231,9 @@ alter table table_name auto_increment= 1;
 
 可以通过数据库备份和恢复来实现，在系统发生奔溃时，使用备份的数据库进行数据恢复。
 
-#### 相关理解
+
+
+**相关理解**
 
 事务的 ACID 特性概念简单，但不是很好理解，主要是因为这几个特性不是一种平级关系。
 
@@ -220,9 +242,9 @@ alter table table_name auto_increment= 1;
 - 在并发的情况下，多个事务并发执行，事务不仅要满足原子性，还需要满足隔离性，才能满足一致性
 - 事务满足持久化是为了能应对数据库奔溃的情况。
 
+#### 
 
-
-#### MySQL中对事务的操作
+### （3）MySQL事务操作
 
 - 开始事务：`start transaction`
 - 回滚事务：`rollback`
@@ -230,7 +252,7 @@ alter table table_name auto_increment= 1;
 
 
 
-JDBC中对事务的操作
+### （4）JDBC事务操作
 
 ```java
 try{
@@ -292,8 +314,6 @@ SQL标准制定的规则，用来限定事务内外的哪些改变是可见的�
 
 
 ### 3、隔离级别详细解读
-
-#### 数据隔离级别
 
 **RU——Read Uncommitted（读取未提交内容）**
 
@@ -507,7 +527,7 @@ JDBC3.0比2.0多了一个特性：**回滚点的设置**，具体操作如下
 
 
 
-## 查询性能优化
+## 七、查询性能优化
 
 
 
